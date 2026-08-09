@@ -4,10 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nexabot — Chatbot Demos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     background: #f0f0f0;
     min-height: 100vh;
     display: flex;
@@ -40,15 +42,37 @@
     color: white;
     text-align: center;
     position: relative;
+    overflow: hidden;
   }
+  .profile::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+  .profile::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -20px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .profile > * { position: relative; z-index: 1; }
   .profile-icon {
-    width: 60px; height: 60px; border-radius: 50%;
+    width: 56px; height: 56px; border-radius: 16px;
     background: rgba(255,255,255,0.22);
     display: flex; align-items: center; justify-content: center;
-    font-size: 28px; margin: 0 auto 10px;
+    font-size: 26px; margin: 0 auto 10px;
   }
-  .profile-name { font-size: 19px; font-weight: 800; margin-bottom: 2px; }
-  .profile-tagline { font-size: 12.5px; opacity: .9; margin-bottom: 10px; }
+  .profile-name { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 700; margin-bottom: 2px; letter-spacing: .3px; }
+  .profile-tagline { font-size: 11.5px; opacity: .85; margin-bottom: 8px; letter-spacing: .6px; text-transform: uppercase; }
+  .online-badge { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 8px; }
+  .online-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+  .online-text { font-size: 11px; opacity: .9; }
+  .rating-row { font-size: 12px; opacity: .95; margin-bottom: 4px; }
+  .rating-row .stars { color: #ffd166; letter-spacing: 1px; }
   .profile-stats {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 10px;
     font-size: 11.5px; opacity: .95;
@@ -80,14 +104,20 @@
     padding: 16px; height: 300px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
   }
+  .msg-wrap { display: flex; flex-direction: column; max-width: 82%; }
+  .msg-wrap.user-wrap { align-self: flex-end; align-items: flex-end; }
+  .msg-wrap.bot-wrap { align-self: flex-start; align-items: flex-start; }
   .msg {
     max-width: 82%; padding: 10px 14px; font-size: 13.5px; line-height: 1.55;
-    border-radius: 16px; white-space: pre-wrap; word-break: break-word;
+    white-space: pre-wrap; word-break: break-word; animation: fadeUp .25s ease;
   }
-  .msg.bot { background: #f7f7f8; border: 1px solid #eee; color: #111; align-self: flex-start; border-bottom-left-radius: 4px; }
-  .msg.user { color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-  .msg.typing { color: #aaa; font-style: italic; background: #f7f7f8; border: 1px solid #eee; align-self: flex-start; border-bottom-left-radius: 4px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.bot { background: #fff; border: 1px solid #eee; box-shadow: 0 1px 6px rgba(0,0,0,0.06); color: #111; align-self: flex-start; border-radius: 4px 18px 18px 18px; }
+  .msg.user { color: white; align-self: flex-end; border-radius: 18px 4px 18px 18px; }
+  .msg.typing { color: #aaa; font-style: italic; background: #f7f7f8; border: 1px solid #eee; align-self: flex-start; border-radius: 4px 18px 18px 18px; }
   .msg b { font-weight: 700; }
+  .msg-time { font-size: 10.5px; color: #bbb; padding: 2px 5px 0; align-self: flex-start; }
+  .msg-time.user-time { align-self: flex-end; }
 
   .book-btn-msg { align-self: flex-start; margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; }
   .book-btn-msg button, .book-btn-msg a {
@@ -102,14 +132,20 @@
     padding: 6px 12px; font-size: 12px; border: 1.5px solid; border-radius: 20px;
     background: white; cursor: pointer; transition: all .15s; font-weight: 600;
   }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .opt {
+    padding: 6px 13px; border-radius: 20px; border: 1.5px solid #ccc;
+    background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+  }
 
-  .input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #f0f0f0; background: white; }
+  .input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #f0f0f0; background: #fff; }
   .input-row input {
     flex: 1; padding: 10px 14px; font-size: 14px;
-    border: 1.5px solid #e0e0e0; border-radius: 24px; outline: none; transition: border .2s;
+    border: 1.5px solid #e8e0d5; border-radius: 12px; outline: none; transition: border .2s;
+    background: #faf8f5;
   }
   .send-btn {
-    width: 40px; height: 40px; border-radius: 50%; color: white; border: none;
+    width: 40px; height: 40px; border-radius: 12px; color: white; border: none;
     cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: opacity .2s;
   }
@@ -170,7 +206,8 @@
     <div class="profile-icon" id="profileIcon">💅</div>
     <div class="profile-name" id="profileName">Glow & Co Salon</div>
     <div class="profile-tagline" id="profileTagline">Luxury Beauty • DHA Phase 6</div>
-    <div class="profile-stats" id="profileStats"></div>
+    <div class="online-badge"><div class="online-dot"></div><div class="online-text">AI Assistant · Available now</div></div>
+    <div class="rating-row" id="ratingRow"></div>
     <div class="profile-row2" id="profileRow2"></div>
   </div>
 
@@ -202,16 +239,16 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label>Date</label><input type="date" id="fDate" /></div>
-        <div class="form-group"><label>Time</label><input type="time" id="fTime" /></div>
+        <div class="form-group"><label>Time</label><select id="fTime"></select></div>
       </div>
       <div class="form-group"><label>Service</label><select id="fService"></select></div>
       <div class="form-group"><label>Note (optional)</label><textarea id="fNote" placeholder="Any special request..."></textarea></div>
       <button class="submit-btn" id="submitBtn" onclick="submitForm()">Confirm Booking</button>
     </div>
     <div class="success-state" id="successState">
-      <div class="success-icon" id="successIcon">✅</div>
-      <h3>Booking Received!</h3>
-      <p id="successMsg">We've received your booking.</p>
+      <div class="success-icon" id="successIcon">📩</div>
+      <h3>One Last Step!</h3>
+      <p id="successMsg">Please confirm your booking on WhatsApp.</p>
       <div class="action-row">
         <a id="waLink" class="wa-btn" target="_blank">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -355,6 +392,7 @@ const bookBtnLabels = { salon:'Book Appointment', dental:'Book Appointment', res
 const modalTitles   = { salon:'Book Appointment', dental:'Book Appointment', restaurant:'Reserve a Table', realestate:'Schedule a Site Visit', gym:'Book Free Trial' };
 
 let currentInd = 'salon';
+let chatLang = null;
 let isTyping = false;
 let conversationHistory = [];
 let bookingShown = false;
@@ -375,8 +413,8 @@ function applyTheme(ind) {
   document.getElementById('successIcon').style.background = t.light;
   document.getElementById('footerLink').style.color = t.primary;
   const inp = document.getElementById('userInput');
-  inp.onfocus = () => inp.style.borderColor = t.primary;
-  inp.onblur  = () => inp.style.borderColor = '#e0e0e0';
+  inp.onfocus = () => { inp.style.borderColor = t.primary; inp.style.background = '#fff'; };
+  inp.onblur  = () => { inp.style.borderColor = '#e8e0d5'; inp.style.background = '#faf8f5'; };
   document.querySelectorAll('.picker-tab').forEach(b => {
     b.classList.remove('active');
     b.style.background = 'white'; b.style.color = '#777'; b.style.borderColor = '#ddd';
@@ -395,8 +433,8 @@ function loadChat() {
   document.getElementById('profileIcon').textContent = d.icon;
   document.getElementById('profileName').textContent = d.name;
   document.getElementById('profileTagline').textContent = d.tagline;
-  document.getElementById('profileStats').innerHTML =
-    `<span>⭐ ${d.rating} · ${d.reviews} reviews</span><span>📍 ${d.area}</span>`;
+  document.getElementById('ratingRow').innerHTML =
+    `<span class="stars">★★★★★</span> ${d.rating} · ${d.reviews} reviews · ${d.area}`;
   document.getElementById('profileRow2').innerHTML =
     `<span class="status-badge">🕐 ${d.status}</span><a href="tel:${d.phone.replace(/-/g,'')}">📞 ${d.phone}</a><span>${d.serviceCount}</span>`;
   document.getElementById('navTabs').innerHTML = d.navTabs.map(t =>
@@ -407,9 +445,27 @@ function loadChat() {
   document.getElementById('userInput').value = '';
   conversationHistory = [];
   bookingShown = false;
+  chatLang = null;
   applyTheme(currentInd);
   loadQuick();
-  addMsg(d.welcome, 'bot');
+  showLangGate();
+}
+
+function showLangGate() {
+  const t = themes[currentInd];
+  const html = `Please select your preferred language to continue.<br>برائے مہربانی اپنی زبان کا انتخاب کریں:` +
+    `<div class="opts">` +
+    `<div class="opt" style="border-color:${t.primary};color:${t.primary}" onmouseover="this.style.background='${t.primary}';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='${t.primary}'" onclick="selectLang('ur')">🇵🇰 اردو</div>` +
+    `<div class="opt" style="border-color:${t.primary};color:${t.primary}" onmouseover="this.style.background='${t.primary}';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='${t.primary}'" onclick="selectLang('en')">🇬🇧 English</div>` +
+    `</div>`;
+  addMsg(html, 'bot');
+}
+
+function selectLang(l) {
+  chatLang = l;
+  addMsg(l === 'ur' ? '🇵🇰 اردو' : '🇬🇧 English', 'user');
+  const d = industries[currentInd];
+  setTimeout(() => addMsg(d.welcome + optsHTML(d.quick), 'bot'), 400);
 }
 
 function loadQuick() {
@@ -423,17 +479,45 @@ function loadQuick() {
   ).join('');
 }
 
+function optsHTML(labels) {
+  const t = themes[currentInd];
+  return '<div class="opts">' + labels.map(q =>
+    `<div class="opt" style="border-color:${t.primary};color:${t.primary}" onmouseover="this.style.background='${t.primary}';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='${t.primary}'" onclick="quickSend('${q.replace(/'/g, "\\'")}')">${q}</div>`
+  ).join('') + '</div>';
+}
+
+function backToMenu() {
+  const d = industries[currentInd];
+  addMsg(d.welcome + optsHTML(d.quick), 'bot');
+}
+
 function formatText(text) {
   return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 }
 
+function timeNow() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
 function addMsg(text, type) {
   const msgs = document.getElementById('msgs');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + (type === 'user' ? 'user-wrap' : 'bot-wrap');
+
   const div = document.createElement('div');
   div.className = 'msg ' + type;
   div.innerHTML = formatText(text);
-  if (type === 'user') div.style.background = themes[currentInd].primary;
-  msgs.appendChild(div);
+  if (type === 'user') div.style.background = `linear-gradient(135deg, ${themes[currentInd].primary}, ${themes[currentInd].dark})`;
+  wrap.appendChild(div);
+
+  if (type !== 'typing') {
+    const time = document.createElement('div');
+    time.className = 'msg-time' + (type === 'user' ? ' user-time' : '');
+    time.textContent = timeNow();
+    wrap.appendChild(time);
+  }
+
+  msgs.appendChild(wrap);
   msgs.scrollTop = msgs.scrollHeight;
   return div;
 }
@@ -478,6 +562,11 @@ function isBookingTrigger(text) {
 
 function quickSend(text) {
   const clean = text.replace(/^[^\w]*\s*/u, '').trim() || text;
+  if (clean.toLowerCase() === 'main menu') {
+    addMsg(text, 'user');
+    backToMenu();
+    return;
+  }
   if (isBookingTrigger(text)) {
     addMsg(clean, 'user');
     conversationHistory.push({ role: 'user', content: clean });
@@ -526,7 +615,7 @@ function getBotReply(d, text) {
   if (d.extraReplies) {
     for (const item of d.extraReplies) {
       if (item.kw.some(k => lower.includes(k))) {
-        return ur ? item.ur : item.en;
+        return (ur ? item.ur : item.en) + optsHTML(['📅 Book Appointment', '🔙 Main Menu']);
       }
     }
   }
@@ -534,42 +623,42 @@ function getBotReply(d, text) {
   const bookingKw = ['book','appoint','reserv','schedul','visit','trial','site visit','free trial','milna','aana','aana hai','karwana'];
   if (bookingKw.some(k => lower.includes(k))) {
     addBookBtn();
-    return ur
+    return (ur
       ? `Zaroor! Neeche diye gaye buttons se booking fill karein, direct call karein, ya WhatsApp par baat karein. 📅`
-      : `Sure! Fill in the booking form below, call us directly, or message us on WhatsApp. 📅`;
+      : `Sure! Fill in the booking form below, call us directly, or message us on WhatsApp. 📅`) + optsHTML(['🔙 Main Menu']);
   }
 
   const servicesKw = ['service','price','rate','fee','menu','plan','package','treatment','listing','cost','kitna','kitne','rates'];
   if (servicesKw.some(k => lower.includes(k))) {
-    return ur
+    return (ur
       ? `Yeh hain hamari ${d.servicesLabel}:\n${servicesList}\n\nBooking karna chahte hain? 😊`
-      : `Here's our ${d.servicesLabel}:\n${servicesList}\n\nWould you like to book? 😊`;
+      : `Here's our ${d.servicesLabel}:\n${servicesList}\n\nWould you like to book? 😊`) + optsHTML(['📅 Book Appointment', '🔙 Main Menu']);
   }
 
   const timingKw = ['timing','time','hour','open','close','band','khulta','khulti','waqt','samay'];
   if (timingKw.some(k => lower.includes(k))) {
-    return ur
+    return (ur
       ? `Hamara timing: ${d.timings}.\nAbhi: ${d.status} 🕐`
-      : `Our timings: ${d.timings}.\nCurrently: ${d.status} 🕐`;
+      : `Our timings: ${d.timings}.\nCurrently: ${d.status} 🕐`) + optsHTML(['📅 Book Appointment', '📍 Location', '🔙 Main Menu']);
   }
 
   const locationKw = ['locat','address','kahan','kidhar','map','area','where'];
   if (locationKw.some(k => lower.includes(k))) {
-    return ur
+    return (ur
       ? `Hum yahan located hain: 📍 ${d.location}.\nContact: ${d.phone}`
-      : `We're located at 📍 ${d.location}.\nContact: ${d.phone}`;
+      : `We're located at 📍 ${d.location}.\nContact: ${d.phone}`) + optsHTML(['📅 Book Appointment', '🔙 Main Menu']);
   }
 
   const reviewKw = ['review','rating','star'];
   if (reviewKw.some(k => lower.includes(k))) {
-    return ur
+    return (ur
       ? `Humari rating ⭐ ${d.rating}/5 hai (${d.reviews} reviews ke sath). Shukriya aapke trust ke liye! 🙏`
-      : `We're rated ⭐ ${d.rating}/5 based on ${d.reviews} reviews. Thanks for your trust! 🙏`;
+      : `We're rated ⭐ ${d.rating}/5 based on ${d.reviews} reviews. Thanks for your trust! 🙏`) + optsHTML(['📅 Book Appointment', '🔙 Main Menu']);
   }
 
-  return ur
+  return (ur
     ? `Shukriya aapke sawal ke liye! Aap "${d.servicesLabel}", "Timings", ya "Location" ke baare mein pooch sakte hain. Ya seedha humein WhatsApp ya call karein: ${d.phone} 😊`
-    : `Thanks for reaching out! Feel free to ask about our "${d.servicesLabel}", "Timings", or "Location" — or message/call us directly: ${d.phone} 😊`;
+    : `Thanks for reaching out! Feel free to ask about our "${d.servicesLabel}", "Timings", or "Location" — or message/call us directly: ${d.phone} 😊`) + optsHTML(d.quick);
 }
 
 async function sendUserMsg(text) {
@@ -583,7 +672,7 @@ async function sendUserMsg(text) {
   await new Promise(r => setTimeout(r, 600 + Math.random() * 500));
 
   const reply = getBotReply(d, text);
-  document.getElementById('typing-indicator')?.remove();
+  document.getElementById('typing-indicator')?.closest('.msg-wrap')?.remove();
   addMsg(reply, 'bot');
 
   isTyping = false;
@@ -644,10 +733,10 @@ function submitForm() {
 
   document.getElementById('waLink').href = `https://wa.me/${d.waNumber}?text=${encodeURIComponent(waMsg)}`;
   document.getElementById('callLink').href = `tel:${d.phone.replace(/-/g,'')}`;
-  document.getElementById('successMsg').textContent = `Booking received for ${name} on ${formattedDate} at ${time}. Tap below to confirm on WhatsApp or call us directly.`;
+  document.getElementById('successMsg').textContent = `Details noted for ${name} on ${formattedDate} at ${time}. Tap below to confirm on WhatsApp or call us directly — your slot isn't final until confirmed.`;
   document.getElementById('formState').style.display = 'none';
   document.getElementById('successState').style.display = 'block';
-  addMsg(`✅ Booking submitted! ${name} — ${formattedDate} at ${time}\nService: ${service}`, 'bot');
+  addMsg(`📩 Almost done! ${name} — ${formattedDate} at ${time}\nService: ${service}\nPlease confirm on WhatsApp to finalize your booking.`, 'bot');
 }
 
 buildPicker();
